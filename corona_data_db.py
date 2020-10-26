@@ -9,7 +9,7 @@ MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'Augus
           'December']
 
 
-def main():
+def get_data():
     def numSplit(num):
         num = str(num)
         num_len = len(num)
@@ -27,7 +27,7 @@ def main():
 
     covid_stats_url = 'https://www.worldometers.info/coronavirus/'
 
-    # get TIME & DATE
+    # get actual TIME & DATE
     dateTime = str(datetime.now()).split()
     date = dateTime[0].split("-")[::-1]
     date[0], date[1] = date[1], date[0]
@@ -36,7 +36,7 @@ def main():
     time = dateTime[1][:dateTime[1].index('.')]
 
 
-    # virus part
+    # gather numbers of cases
     req = requests.get(covid_stats_url)
     covid_stats_page = BeautifulSoup(req.content, 'html.parser')
     covid_stats = list(covid_stats_page.findAll(class_='maincounter-number'))
@@ -53,7 +53,7 @@ def main():
     total_recovered = total_recovered.split(',')
     total_recovered = int(''.join(total_recovered))
 
-    # SQL part
+    # save in database
     conn = sqlite3.connect('corona_stats.db')
     c = conn.cursor()
 
@@ -69,6 +69,7 @@ def main():
 
     conn.close()
 
+    # output
     active = total_infected-total_dead-total_recovered
     active_last = data[-1][1] - data[-1][2] - data[-1][3]
     diff = active - active_last
@@ -81,5 +82,5 @@ def main():
 
 
 print("*** Covid - 19 Actual Stats ***")
-main()
+get_data()
 sleep(5)
